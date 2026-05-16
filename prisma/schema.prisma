@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  type        ProjectType
+  status      ProjectStatus @default(DRAFT)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  templates   Template[]
+  requests    AIRequest[]
+}
+
+model Template {
+  id          String   @id @default(uuid())
+  title       String
+  category    TemplateCategory
+  thumbnail   String?
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  createdAt   DateTime @default(now())
+}
+
+model AIRequest {
+  id           String   @id @default(uuid())
+  project      Project  @relation(fields: [projectId], references: [id])
+  projectId    String
+  input        Json
+  output       Json
+  provider     AIProvider
+  requestType  RequestType
+  status       RequestStatus @default(PENDING)
+  createdAt    DateTime @default(now())
+}
+
+enum ProjectType {
+  SOCIAL
+  BANNER
+  COMMERCIAL
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum TemplateCategory {
+  TRAVEL
+  AVIATION
+  LUXURY
+  FESTIVAL
+  CORPORATE
+  HOLIDAY
+}
+
+enum AIProvider {
+  OPENAI
+  CLAUDE
+  STABILITY
+}
+
+enum RequestType {
+  TEXT
+  IMAGE
+  MULTIMEDIA
+}
+
+enum RequestStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
