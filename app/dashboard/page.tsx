@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 const navItems = [
   { label: "Projects", href: "/projects" },
@@ -8,6 +11,26 @@ const navItems = [
 ];
 
 export default function DashboardPage() {
+
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+  fetchProjects();
+}, []);
+
+async function fetchProjects() {
+  try {
+    const res = await fetch("/api/projects");
+
+    const data = await res.json();
+
+    setProjects(data.projects || []);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    setLoading(false);
+  }
+}
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100 md:px-12">
       <section className="mx-auto max-w-7xl">
@@ -32,15 +55,37 @@ export default function DashboardPage() {
               <h2 className="mt-2 text-2xl font-semibold text-white">Your latest Indigo campaigns</h2>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
-                <p className="text-sm text-slate-400">Instagram launch story</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">Skyward Festival</h3>
-              </div>
-              <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4">
-                <p className="text-sm text-slate-400">Corporate branding kit</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">Aviation tech story</h3>
-              </div>
-            </div>
+
+  {loading ? (
+    <p className="text-slate-400">
+      Loading projects...
+    </p>
+  ) : projects.length === 0 ? (
+    <p className="text-slate-400">
+      No projects found.
+    </p>
+  ) : (
+    projects.map((project) => (
+      <div
+        key={project.id}
+        className="rounded-3xl border border-white/10 bg-slate-950/80 p-4"
+      >
+        <p className="text-sm text-slate-400">
+          {project.type}
+        </p>
+
+        <h3 className="mt-2 text-xl font-semibold text-white">
+          {project.name}
+        </h3>
+
+        <p className="mt-2 text-sm text-slate-400">
+          {project.description}
+        </p>
+      </div>
+    ))
+  )}
+
+</div>
           </motion.div>
 
           <motion.aside initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="rounded-3xl border border-white/10 bg-slate-900/80 p-6 shadow-glow backdrop-blur-xl">
